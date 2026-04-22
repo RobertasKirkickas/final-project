@@ -122,6 +122,29 @@ class PostCommentAPIView(APIView):
         api_models.Notification.objects.create(user=post.user, post=post, type="Comment")
         return Response({"message": "Comment Sent"}, status=status.HTTP_201_CREATED)
 
+# Handles joining/leaving clean-up events and notifications
+class JoinPostAPIView(APIView):
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'user_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+                'post_id': openapi.Schema(type=openapi.TYPE_INTEGER),
+            },
+        ),
+    )
+    def post(self, request):
+        user = api_models.User.objects.get(id=request.data['user_id'])
+        post = api_models.Post.objects.get(id=request.data['post_id'])
+
+        if user in post.attendees.all():
+            post.attendees.remove(user)
+            return Response({"message": "Left the event"}, status=status.HTTP_200_OK)
+        else:
+            post.attendees.add(user)
+            api_models.Notification.objects.create(user=post.user, post=post, type="Join")
+            return Response({"message": "Joined the event"}, status=status.HTTP_201_CREATED)
+
 # Handles bookmarking/unbookmarking reports.
 class BookmarkPostAPIView(APIView):
     @swagger_auto_schema(

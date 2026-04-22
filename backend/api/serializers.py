@@ -70,10 +70,15 @@ class CommentSerializer(serializers.ModelSerializer):
 # Post Serializer
 class PostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
+    attendees = UserSerializer(many=True, read_only=True) 
+    attendees_count = serializers.SerializerMethodField()
     
     class Meta:
         model = api_models.Post
         fields = "__all__"
+
+    def get_attendees_count(self, obj):
+        return obj.attendees.count()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

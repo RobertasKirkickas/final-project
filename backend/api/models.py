@@ -83,6 +83,7 @@ class Post(models.Model):
         ("Scheduled", "Clean-up Scheduled"),
         ("Cleared", "Cleared"),
         ("Disabled", "Disabled"),
+        ("Join", "Join"),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -95,6 +96,7 @@ class Post(models.Model):
     status = models.CharField(max_length=100, choices=STATUS, default="Reported")
     view = models.IntegerField(default=0)
     likes = models.ManyToManyField(User, blank=True, related_name="likes_user")
+    attendees = models.ManyToManyField(User, blank=True, related_name="joined_posts")
     slug = models.SlugField(unique=True, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
     
