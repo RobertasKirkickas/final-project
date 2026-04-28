@@ -26,7 +26,7 @@ export const login = async (email, password) => {
 			setAuthUser(data.access, data.refresh);
 			Toast.fire({
 				icon: 'success',
-				title: 'Signed in successfully',
+				title: 'Logged in successfully',
 			});
 		}
 
@@ -57,7 +57,7 @@ export const register = async (full_name, email, password, password2) => {
 
 		Toast.fire({
 			icon: 'success',
-			title: 'Signed Up Successfully',
+			title: 'Registered Successfully',
 		});
 
 		// Returning data and error information
