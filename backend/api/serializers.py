@@ -67,12 +67,19 @@ class CommentSerializer(serializers.ModelSerializer):
         model = api_models.Comment
         fields = "__all__"
 
+# Post Image Serializer
+class PostImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = api_models.PostImage
+        fields = ["id", "image"]
+
 # Post Serializer
 class PostSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     attendees = UserSerializer(many=True, read_only=True) 
     attendees_count = serializers.SerializerMethodField()
-    
+    additional_images = PostImageSerializer(many=True, read_only=True, source='images')
+
     class Meta:
         model = api_models.Post
         fields = "__all__"

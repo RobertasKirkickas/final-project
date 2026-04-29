@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_cleanup.apps.CleanupConfig', # Automatically deletes old files when a new file is uploaded or when a model instance is deleted
 
     # Custom Apps
     'api',

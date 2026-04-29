@@ -58,7 +58,7 @@ function App() {
 						}
 					/>
 					<Route
-						path='/posts/'
+						path='/dashboard/posts/'
 						element={
 							<PrivateRoute>
 								<Posts />
@@ -66,7 +66,7 @@ function App() {
 						}
 					/>
 					<Route
-						path='/add-post/'
+						path='/dashboard/add-post/'
 						element={
 							<PrivateRoute>
 								<AddPost />
@@ -74,7 +74,7 @@ function App() {
 						}
 					/>
 					<Route
-						path='/edit-post/:id/'
+						path='/dashboard/edit-post/:id/'
 						element={
 							<PrivateRoute>
 								<EditPost />
@@ -82,7 +82,7 @@ function App() {
 						}
 					/>
 					<Route
-						path='/comments/'
+						path='/dashboard/comments/'
 						element={
 							<PrivateRoute>
 								<Comments />
@@ -90,7 +90,7 @@ function App() {
 						}
 					/>
 					<Route
-						path='/notifications/'
+						path='/dashboard/notifications/'
 						element={
 							<PrivateRoute>
 								<Notifications />
@@ -98,7 +98,7 @@ function App() {
 						}
 					/>
 					<Route
-						path='/profile/'
+						path='/dashboard/profile/'
 						element={
 							<PrivateRoute>
 								<Profile />

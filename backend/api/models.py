@@ -99,7 +99,9 @@ class Post(models.Model):
     attendees = models.ManyToManyField(User, blank=True, related_name="joined_posts")
     slug = models.SlugField(unique=True, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    
+    scheduled_date = models.DateField(null=True, blank=True)
+    scheduled_time = models.TimeField(null=True, blank=True)
+
     def __str__(self):
         return self.title
     
@@ -113,7 +115,20 @@ class Post(models.Model):
     
     def comments(self):
         return Comment.objects.filter(post=self).order_by("-id")
+    
+    def additional_images(self):
+        return PostImage.objects.filter(post=self)
 
+# PostImage model for additional images of a post
+class PostImage(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="images")
+    image = models.FileField(upload_to="image", null=True, blank=True)
+
+    def __str__(self):
+        return f"Image for {self.post.title}"
+
+    class Meta:
+        verbose_name_plural = "Post Images"
 
 # Comment
 class Comment(models.Model):

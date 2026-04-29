@@ -12,6 +12,7 @@ function Dashboard() {
 	const [comments, setComments] = useState([]);
 	const [noti, setNoti] = useState([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [searchTerm, setSearchTerm] = useState('');
 
 	const user_id = userData()?.user_id;
 
@@ -36,6 +37,13 @@ function Dashboard() {
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const handleSearch = (e) => {
+		const term = e.target.value.toLowerCase();
+		setSearchTerm(term);
+		const filtered = originalPosts.filter((p) => p.title.toLowerCase().includes(term) || p.category?.title?.toLowerCase().includes(term));
+		setPost(filtered);
 	};
 
 	// Handle post deletion with confirmation
@@ -141,7 +149,7 @@ function Dashboard() {
 							</div>
 							{posts.length > 0 && (
 								<div className='card-footer bg-transparent border-0 text-center pb-3 mt-auto'>
-									<Link to='/posts/' className='btn btn-link btn-sm text-success fw-bold text-decoration-none'>
+									<Link to='/dashboard/posts/' className='btn btn-link btn-sm text-success fw-bold text-decoration-none'>
 										View all Reports
 									</Link>
 								</div>
@@ -175,7 +183,7 @@ function Dashboard() {
 							</div>
 							{comments.length > 0 && (
 								<div className='card-footer bg-transparent border-0 text-center pb-3 mt-auto'>
-									<Link to='/comments/' className='btn btn-link btn-sm text-primary fw-bold text-decoration-none'>
+									<Link to='/dashboard/comments/' className='btn btn-link btn-sm text-primary fw-bold text-decoration-none'>
 										View all Comments
 									</Link>
 								</div>
@@ -232,7 +240,7 @@ function Dashboard() {
 							</div>
 							{noti.length > 0 && (
 								<div className='card-footer bg-transparent border-0 text-center pb-3 mt-auto'>
-									<Link to='/notifications/' className='btn btn-link btn-sm text-warning fw-bold text-decoration-none'>
+									<Link to='/dashboard/notifications/' className='btn btn-link btn-sm text-warning fw-bold text-decoration-none'>
 										View all Notifications
 									</Link>
 								</div>
@@ -252,7 +260,7 @@ function Dashboard() {
 								{posts?.length || 0}
 							</span>
 						</div>
-						<Link to='/add-post/' className='btn btn-success btn-sm px-3 fw-bold shadow-sm' style={{ backgroundColor: '#22c55e', border: 'none' }}>
+						<Link to='/dashboard/add-post/' className='btn btn-success btn-sm px-3 fw-bold shadow-sm' style={{ backgroundColor: '#22c55e', border: 'none' }}>
 							<i className='bi bi-plus-lg me-2'></i>New Report
 						</Link>
 					</div>
@@ -264,7 +272,7 @@ function Dashboard() {
 									<span className='input-group-text bg-white border-end-0 text-muted'>
 										<i className='bi bi-search' />
 									</span>
-									<input className='form-control border-start-0 bg-white' type='search' placeholder='Search reports...' />
+									<input className='form-control border-start-0 bg-white' type='search' placeholder='Search reports...' value={searchTerm} onChange={handleSearch} />
 								</div>
 							</div>
 							<div className='col-md-3'>
@@ -291,6 +299,7 @@ function Dashboard() {
 									</tr>
 								</thead>
 								<tbody>
+									{/* Display reports or empty state */}
 									{posts.length > 0 ? (
 										posts.map((p) => (
 											<tr key={p.id}>
@@ -301,11 +310,27 @@ function Dashboard() {
 													<span className='badge bg-light text-dark border'>{p?.category?.title}</span>
 												</td>
 												<td>
-													<span className={`badge ${p.status === 'Cleared' ? 'bg-success' : 'bg-warning'} text-white`}>{p?.status}</span>
+													{/* Status badge with colour coding */}
+													<span
+														className={`badge ${
+															p.status === 'Reported'
+																? 'bg-danger'
+																: p.status === 'Scheduled'
+																	? 'bg-warning'
+																	: p.status === 'Cleared'
+																		? 'bg-success'
+																		: p.status === 'Disabled'
+																			? 'bg-dark'
+																			: 'bg-secondary'
+														} text-white`}
+													>
+														{p?.status}
+													</span>
 												</td>
 												<td>
+													{/* Edit and Delete buttons with icons */}
 													<div className='d-flex gap-2'>
-														<Link to={`/edit-post/${p.id}/`} className='btn btn-outline-primary btn-sm rounded-circle' title='Edit'>
+														<Link to={`/dashboard/edit-post/${p.id}/`} className='btn btn-outline-primary btn-sm rounded-circle' title='Edit'>
 															<i className='bi bi-pencil-square' />
 														</Link>
 														<button onClick={() => handlePostDelete(p.id)} className='btn btn-outline-danger btn-sm rounded-circle' title='Delete'>
@@ -332,6 +357,9 @@ function Dashboard() {
 	);
 }
 
+{
+	/* Reusable component for dashboard stats */
+}
 function InfoCard({ icon, color, value, label }) {
 	return (
 		<div className='col-sm-6 col-lg-3'>

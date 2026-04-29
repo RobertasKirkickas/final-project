@@ -4,6 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.http import Http404
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
 
 # Documentation tool (Swagger)
 from drf_yasg import openapi
@@ -68,15 +71,23 @@ class PostDetailAPIView(generics.RetrieveAPIView):
     def get_object(self):
         slug = self.kwargs['slug']
         post = api_models.Post.objects.get(slug=slug)
-        if post.status != "Disabled":
-            post.view += 1
-            post.save()
+
+        # If the report is disabled, we return a 404 to hide it from public view
+        if post.status == "Disabled":
+            raise Http404("This report is disabled and no longer public.")
+
+        # If everything is fine, we increment the view count and save
+        post.view += 1
+        post.save()
+        
         return post
 
 # Interactions with posts (like, comment, bookmark)
 
 # Handles liking/unliking logic and notifications
 class LikePostAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -87,19 +98,21 @@ class LikePostAPIView(APIView):
         ),
     )
     def post(self, request):
-        user = api_models.User.objects.get(id=request.data['user_id'])
-        post = api_models.Post.objects.get(id=request.data['post_id'])
+        user = get_object_or_404(api_models.User, id=request.data['user_id'])
+        post = get_object_or_404(api_models.Post, id=request.data['post_id'])
 
         if user in post.likes.all():
             post.likes.remove(user)
-            return Response({"message": "Post Unliked"}, status=status.HTTP_200_OK)
+            return Response({"message": "Report Unliked"}, status=status.HTTP_200_OK)
         else:
             post.likes.add(user)
             api_models.Notification.objects.create(user=post.user, post=post, type="Like")
-            return Response({"message": "Post Liked"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Report Liked"}, status=status.HTTP_201_CREATED)
 
 # Adds a comment and notifies the reporter
 class PostCommentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -112,7 +125,8 @@ class PostCommentAPIView(APIView):
         ),
     )
     def post(self, request):
-        post = api_models.Post.objects.get(id=request.data['post_id'])
+        post = get_object_or_404(api_models.Post, id=request.data['post_id'])
+        
         api_models.Comment.objects.create(
             post=post,
             name=request.data['name'],
@@ -124,6 +138,8 @@ class PostCommentAPIView(APIView):
 
 # Handles joining/leaving clean-up events and notifications
 class JoinPostAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -134,8 +150,8 @@ class JoinPostAPIView(APIView):
         ),
     )
     def post(self, request):
-        user = api_models.User.objects.get(id=request.data['user_id'])
-        post = api_models.Post.objects.get(id=request.data['post_id'])
+        user = get_object_or_404(api_models.User, id=request.data['user_id'])
+        post = get_object_or_404(api_models.Post, id=request.data['post_id'])
 
         if user in post.attendees.all():
             post.attendees.remove(user)
@@ -147,6 +163,8 @@ class JoinPostAPIView(APIView):
 
 # Handles bookmarking/unbookmarking reports.
 class BookmarkPostAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         request_body=openapi.Schema(
             type=openapi.TYPE_OBJECT,
@@ -157,17 +175,17 @@ class BookmarkPostAPIView(APIView):
         ),
     )
     def post(self, request):
-        user = api_models.User.objects.get(id=request.data['user_id'])
-        post = api_models.Post.objects.get(id=request.data['post_id'])
+        user = get_object_or_404(api_models.User, id=request.data['user_id'])
+        post = get_object_or_404(api_models.Post, id=request.data['post_id'])
         bookmark = api_models.Bookmark.objects.filter(post=post, user=user).first()
 
         if bookmark:
             bookmark.delete()
-            return Response({"message": "Bookmark Removed"}, status=status.HTTP_200_OK)
+            return Response({"message": "Report Unsaved"}, status=status.HTTP_200_OK)
         else:
             api_models.Bookmark.objects.create(user=user, post=post)
             api_models.Notification.objects.create(user=post.user, post=post, type="Bookmark")
-            return Response({"message": "Post Bookmarked"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "Report Saved"}, status=status.HTTP_201_CREATED)
         
 
 # Dashboard API Endpoints for Volunteers
@@ -175,7 +193,7 @@ class BookmarkPostAPIView(APIView):
 # Shows statistics in the dashboard including total views, posts, likes, and bookmarks
 class DashboardStats(generics.ListAPIView):
     serializer_class = api_serializers.UserStatsSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -201,7 +219,7 @@ class DashboardStats(generics.ListAPIView):
 # Lists all posts created by a volunteer in the dashboard
 class DashboardPostLists(generics.ListAPIView):
     serializer_class = api_serializers.PostSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -210,7 +228,7 @@ class DashboardPostLists(generics.ListAPIView):
 # Lists all comments on the volunteer's posts in the dashboard
 class DashboardCommentLists(generics.ListAPIView):
     serializer_class = api_serializers.CommentSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -219,7 +237,7 @@ class DashboardCommentLists(generics.ListAPIView):
 # Lists all unseen notifications for a volunteer in the dashboard
 class DashboardNotificationsList(generics.ListAPIView):
     serializer_class = api_serializers.NotificationSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
@@ -227,6 +245,8 @@ class DashboardNotificationsList(generics.ListAPIView):
 
 # Updates notification status to 'seen'
 class DashboardMarkNotificationAsSeen(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         noti = api_models.Notification.objects.get(id=request.data['noti_id'])
         noti.seen = True
@@ -235,6 +255,8 @@ class DashboardMarkNotificationAsSeen(APIView):
 
 # Allows a volunteer to reply to a specific comment on their report from the dashboard
 class DashboardReplyCommentAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request):
         comment = api_models.Comment.objects.get(id=request.data['comment_id'])
         comment.reply = request.data['reply']
@@ -244,28 +266,38 @@ class DashboardReplyCommentAPIView(APIView):
 # Allows a volunteer to create a new litter report from the dashboard
 class DashboardPostCreateAPIView(generics.CreateAPIView):
     serializer_class = api_serializers.PostSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         user = api_models.User.objects.get(id=request.data.get('user_id'))
-        category = api_models.Category.objects.get(id=request.data.get('category'))
+        category = get_object_or_404(api_models.Category, id=request.data.get('category'))
         
-        api_models.Post.objects.create(
+        post = api_models.Post.objects.create(
             user=user,
             profile=user.profile,
             title=request.data.get('title'),
-            image=request.data.get('image'),
+            image=request.FILES.get('image'),
             description=request.data.get('description'),
             tags=request.data.get('tags'),
             category=category,
-            status=request.data.get('post_status', 'Reported')
+            status=request.data.get('post_status', 'Reported'),
+            scheduled_date=request.data.get('scheduled_date'),
+            scheduled_time=request.data.get('scheduled_time')
         )
-        return Response({"message": "Post created successfully"}, status=status.HTTP_201_CREATED)
+
+        for key in request.FILES:
+            if key.startswith('image_'):
+                api_models.PostImage.objects.create(
+                    post=post,
+                    image=request.FILES.get(key)
+                )
+
+        return Response({"message": "Report created successfully"}, status=status.HTTP_201_CREATED)
 
 # Allows a volunteer to update or delete an existing litter report from the dashboard
 class DashboardPostEditAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = api_serializers.PostSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return api_models.Post.objects.get(id=self.kwargs.get('post_id'), user__id=self.kwargs.get('user_id'))
@@ -275,12 +307,27 @@ class DashboardPostEditAPIView(generics.RetrieveUpdateDestroyAPIView):
         category = api_models.Category.objects.get(id=request.data.get('category'))
 
         post.title = request.data.get('title')
-        if request.data.get('image') and request.data.get('image') != "undefined":
-            post.image = request.data.get('image')
+        if request.FILES.get('image') and request.FILES.get('image') != "undefined":
+            post.image = request.FILES.get('image')
+
         post.description = request.data.get('description')
         post.tags = request.data.get('tags')
         post.category = category
         post.status = request.data.get('post_status')
+        post.scheduled_date = request.data.get('scheduled_date')
+        post.scheduled_time = request.data.get('scheduled_time')
         post.save()
 
-        return Response({"message": "Post updated successfully"}, status=status.HTTP_200_OK)
+        new_extra_images = [key for key in request.FILES if key.startswith('image_')]
+
+        if new_extra_images:
+            # Delete old extra images if new ones are provided
+            api_models.PostImage.objects.filter(post=post).delete()
+
+            for key in new_extra_images:
+                api_models.PostImage.objects.create(
+                    post=post,
+                    image=request.FILES.get(key)
+                )
+
+        return Response({"message": "Report updated successfully"}, status=status.HTTP_200_OK)
