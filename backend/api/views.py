@@ -331,3 +331,19 @@ class DashboardPostEditAPIView(generics.RetrieveUpdateDestroyAPIView):
                 )
 
         return Response({"message": "Report updated successfully"}, status=status.HTTP_200_OK)
+    
+# Deletes the 'deleted' image/s on save
+class PostImageDeleteAPIView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = api_models.PostImage.objects.all()
+
+    def get_object(self):
+        # Ensure that the image being deleted belongs to the post and user making the request
+        image_id = self.kwargs.get('image_id')
+        post_id = self.kwargs.get('post_id')
+        return get_object_or_404(
+            api_models.PostImage, 
+            id=image_id, 
+            post__id=post_id, 
+            post__user=self.request.user
+        )

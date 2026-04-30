@@ -30,4 +30,5 @@ urlpatterns = [
     path('dashboard/reply-comment/', api_views.DashboardReplyCommentAPIView.as_view()),
     path('dashboard/post-create/', api_views.DashboardPostCreateAPIView.as_view()),
     path('dashboard/post-detail/<user_id>/<post_id>/', api_views.DashboardPostEditAPIView.as_view()),
+    path('dashboard/post-image-delete/<int:post_id>/<int:image_id>/', api_views.PostImageDeleteAPIView.as_view(), name='post_image_delete')
 ]

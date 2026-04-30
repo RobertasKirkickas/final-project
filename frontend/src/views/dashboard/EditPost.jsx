@@ -48,10 +48,30 @@ function EditPost() {
 						scheduled_time: postRes.data.scheduled_time || '',
 					});
 
-					// Handle existing image (if any)
+					const loadedImages = [];
+
+					// Add the main post image
 					if (postRes.data.image) {
-						setImages([{ preview: postRes.data.image, isExisting: true }]);
+						loadedImages.push({
+							preview: postRes.data.image,
+							isExisting: true,
+							isMain: true,
+						});
 					}
+
+					// Add additional images if they exist
+					if (postRes.data.additional_images && postRes.data.additional_images.length > 0) {
+						postRes.data.additional_images.forEach((img) => {
+							loadedImages.push({
+								id: img.id,
+								preview: img.image,
+								isExisting: true,
+								isMain: false,
+							});
+						});
+					}
+
+					setImages(loadedImages);
 					setIsFetching(false);
 				} catch (error) {
 					console.error('Fetch Error:', error);
@@ -83,7 +103,18 @@ function EditPost() {
 		setImages([...images, ...newImages]);
 	};
 
-	const removeImage = (index) => {
+	const removeImage = async (index) => {
+		const imageToRemove = images[index];
+
+		// If it's an existing image, attempt to delete it from the server
+		if (imageToRemove.isExisting && imageToRemove.id) {
+			try {
+				await apiInstance.delete(`dashboard/post-image-delete/${id}/${imageToRemove.id}/`);
+			} catch (error) {
+				console.error('Failed to delete image from server:', error);
+			}
+		}
+
 		setImages(images.filter((_, i) => i !== index));
 	};
 
