@@ -20,7 +20,37 @@ apiInstance.interceptors.request.use(
 		}
 		return config;
 	},
-	(error) => {
+	(error) => Promise.reject(error),
+);
+
+// Response interceptor to handle token refresh on 401 errors
+apiInstance.interceptors.response.use(
+	(response) => response,
+	async (error) => {
+		const originalRequest = error.config;
+
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			originalRequest._retry = true;
+			const refreshToken = Cookies.get('refresh_token');
+
+			if (refreshToken) {
+				try {
+					const response = await axios.post('http://127.0.0.1:8000/api/v1/user/token/refresh/', {
+						refresh: refreshToken,
+					});
+
+					const newAccessToken = response.data.access;
+					Cookies.set('access_token', newAccessToken);
+
+					originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+					return apiInstance(originalRequest);
+				} catch (refreshError) {
+					Cookies.remove('access_token');
+					Cookies.remove('refresh_token');
+					window.location.href = '/login';
+				}
+			}
+		}
 		return Promise.reject(error);
 	},
 );
