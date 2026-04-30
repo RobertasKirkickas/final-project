@@ -7,6 +7,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from django.http import Http404
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
+from api.serializers import ChangePasswordSerializer
 
 # Documentation tool (Swagger)
 from drf_yasg import openapi
@@ -347,3 +348,25 @@ class PostImageDeleteAPIView(generics.DestroyAPIView):
             post__id=post_id, 
             post__user=self.request.user
         )
+
+# Allows a volunteer to change their password in the profile page
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Initialise the serializer with request data
+        serializer = ChangePasswordSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            user = request.user
+            # Check if the current password is correct
+            if not user.check_password(serializer.data.get("current_password")):
+                return Response({"message": "Wrong current password"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Set and save the new password
+            user.set_password(serializer.data.get("new_password"))
+            user.save()
+            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+
+        # Return validation errors if serializer is not valid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

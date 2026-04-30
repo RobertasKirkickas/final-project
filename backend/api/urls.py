@@ -8,6 +8,7 @@ urlpatterns = [
     path('user/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('user/register/', api_views.RegisterView.as_view(), name='auth_register'),
     path('user/profile/<user_id>/', api_views.ProfileView.as_view(), name='user_profile'),
+    path('user/change-password/<user_id>/', api_views.ChangePasswordView.as_view(), name='change_password'),
 
     # Post Endpoints
     path('post/category/list/', api_views.CategoryListAPIView.as_view()),

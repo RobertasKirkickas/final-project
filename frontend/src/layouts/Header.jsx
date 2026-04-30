@@ -95,6 +95,11 @@ function Header() {
 								</a>
 								<ul className='dropdown-menu dropdown-menu-end shadow position-absolute' aria-labelledby='userMenu'>
 									<li>
+										<Link className='dropdown-item' to='/dashboard/profile/'>
+											<i className='bi bi-person me-2'></i>Profile
+										</Link>
+									</li>
+									<li>
 										<Link className='dropdown-item' to='/dashboard/'>
 											<i className='bi bi-speedometer2 me-2'></i>Dashboard
 										</Link>

@@ -132,3 +132,10 @@ class UserStatsSerializer(serializers.Serializer):
     posts = serializers.IntegerField(default=0)
     likes = serializers.IntegerField(default=0)
     bookmarks = serializers.IntegerField(default=0)
+
+# Change Password Serializer
+class ChangePasswordSerializer(serializers.Serializer):
+    # Field for the current password to verify identity
+    current_password = serializers.CharField(required=True)
+    # Field for the new password
+    new_password = serializers.CharField(required=True)
