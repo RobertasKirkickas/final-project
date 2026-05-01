@@ -79,6 +79,7 @@ class PostSerializer(serializers.ModelSerializer):
     attendees = UserSerializer(many=True, read_only=True) 
     attendees_count = serializers.SerializerMethodField()
     additional_images = PostImageSerializer(many=True, read_only=True, source='images')
+    bookmark_user_ids = serializers.SerializerMethodField()
 
     class Meta:
         model = api_models.Post
@@ -86,6 +87,9 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_attendees_count(self, obj):
         return obj.attendees.count()
+    
+    def get_bookmark_user_ids(self, obj):
+        return api_models.Bookmark.objects.filter(post=obj).values_list('user_id', flat=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

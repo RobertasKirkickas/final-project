@@ -16,6 +16,14 @@ function Dashboard() {
 
 	const user_id = userData()?.user_id;
 
+	// Helper function to prevent layout breaking by long texts
+	const truncateText = (text, maxLength) => {
+		if (text && text.length > maxLength) {
+			return text.substring(0, maxLength) + '...';
+		}
+		return text;
+	};
+
 	// Fetch dashboard data (stats, posts, comments, notifications)
 	const fetchDashboardData = async () => {
 		setIsLoading(true);
@@ -111,7 +119,7 @@ function Dashboard() {
 					<InfoCard icon='bi-eye' color='success' value={stats?.views} label='Total Views' />
 					<InfoCard icon='bi-megaphone' color='primary' value={stats?.posts} label='My Reports' />
 					<InfoCard icon='bi-heart' color='danger' value={stats?.likes} label='Likes' />
-					<InfoCard icon='bi-bookmark' color='info' value={stats?.saved} label='Saved' />
+					<InfoCard icon='bi-bookmark' color='info' value={stats?.bookmarks} label='Saved' />
 				</div>
 
 				{/* Activity overview row */}
@@ -131,7 +139,7 @@ function Dashboard() {
 										<div key={p.id} className='d-flex align-items-center mb-3'>
 											<img src={p?.image} className='rounded-3 shadow-sm' style={{ width: '80px', height: '80px', objectFit: 'cover' }} alt='' />
 											<div className='ms-3'>
-												<h6 className='mb-1 small fw-bold'>{p?.title}</h6>
+												<h6 className='mb-1 small fw-bold'>{truncateText(p?.title, 25)}</h6>
 												<small className='text-muted d-block'>
 													<i className='bi bi-calendar-event me-1'></i>
 													{moment(p.date).format('DD MMM, YYYY')}
@@ -172,7 +180,7 @@ function Dashboard() {
 										<div key={c.id} className='d-flex align-items-center mb-3'>
 											<img src={c?.image || 'https://'} className='rounded-circle border' style={{ width: '50px', height: '50px', objectFit: 'cover' }} alt='' />
 											<div className='ms-3'>
-												<p className='mb-0 small fw-bold text-dark'>{c?.comment}</p>
+												<p className='mb-0 small fw-bold text-dark'>{truncateText(c?.comment, 40)}</p>
 												<small className='text-muted'>by {c?.name}</small>
 											</div>
 										</div>
@@ -220,10 +228,11 @@ function Dashboard() {
 											</div>
 											<div>
 												<p className='mb-0 small text-dark'>
-													<span className='fw-bold'>{n.user?.username || 'Someone'}</span>
-													{n.type === 'Like' && ` liked your report`}
-													{n.type === 'Comment' && ` commented on your report`}
-													{n.type === 'Bookmark' && ` saved your report`}
+													<span className='fw-bold'>{n.sender?.full_name || 'Someone'}</span>
+													{n.type === 'Like' && ` liked: `}
+													{n.type === 'Comment' && ` commented on: `}
+													{n.type === 'Bookmark' && ` saved: `}
+													<span className='text-muted fw-normal'>{truncateText(n.post?.title, 15)}</span>
 
 													{/* Fallback for unknown notification types */}
 													{!['Like', 'Comment', 'Bookmark'].includes(n.type) && ` triggered a ${n.type}`}
@@ -303,7 +312,7 @@ function Dashboard() {
 									{posts.length > 0 ? (
 										posts.map((p) => (
 											<tr key={p.id}>
-												<td className='ps-4 fw-bold text-dark'>{p?.title}</td>
+												<td className='ps-4 fw-bold text-dark'>{truncateText(p?.title, 35)}</td>
 												<td>{p?.view} Views</td>
 												<td>{moment(p.date).format('DD MMM, YYYY')}</td>
 												<td>

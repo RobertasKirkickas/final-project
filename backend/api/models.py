@@ -169,6 +169,7 @@ class Notification(models.Model):
     type = models.CharField(max_length=100, choices=NOTI_TYPE)
     seen = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notification_sender", null=True, blank=True)
 
     def __str__(self):
         if self.post:

@@ -107,7 +107,12 @@ class LikePostAPIView(APIView):
             return Response({"message": "Report Unliked"}, status=status.HTTP_200_OK)
         else:
             post.likes.add(user)
-            api_models.Notification.objects.create(user=post.user, post=post, type="Like")
+            api_models.Notification.objects.create(
+                user=post.user, # Notify the report owner
+                sender=user, # The user who liked the report
+                post=post, 
+                type="Like"
+            )
             return Response({"message": "Report Liked"}, status=status.HTTP_201_CREATED)
 
 # Adds a comment and notifies the reporter
@@ -134,7 +139,12 @@ class PostCommentAPIView(APIView):
             email=request.data['email'],
             comment=request.data['comment']
         )
-        api_models.Notification.objects.create(user=post.user, post=post, type="Comment")
+        api_models.Notification.objects.create(
+            user=post.user, 
+            sender=request.user, 
+            post=post, 
+            type="Comment"
+        )
         return Response({"message": "Comment Sent"}, status=status.HTTP_201_CREATED)
 
 # Handles joining/leaving clean-up events and notifications
@@ -159,7 +169,12 @@ class JoinPostAPIView(APIView):
             return Response({"message": "Left the event"}, status=status.HTTP_200_OK)
         else:
             post.attendees.add(user)
-            api_models.Notification.objects.create(user=post.user, post=post, type="Join")
+            api_models.Notification.objects.create(
+                user=post.user, 
+                sender=user, 
+                post=post, 
+                type="Join"
+            )
             return Response({"message": "Joined the event"}, status=status.HTTP_201_CREATED)
 
 # Handles bookmarking/unbookmarking reports.
@@ -185,7 +200,12 @@ class BookmarkPostAPIView(APIView):
             return Response({"message": "Report Unsaved"}, status=status.HTTP_200_OK)
         else:
             api_models.Bookmark.objects.create(user=user, post=post)
-            api_models.Notification.objects.create(user=post.user, post=post, type="Bookmark")
+            api_models.Notification.objects.create(
+                user=post.user, 
+                sender=user, 
+                post=post, 
+                type="Bookmark"
+            )
             return Response({"message": "Report Saved"}, status=status.HTTP_201_CREATED)
         
 
