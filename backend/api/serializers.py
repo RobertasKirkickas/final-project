@@ -63,9 +63,18 @@ class CategorySerializer(serializers.ModelSerializer):
 
 # Comment Serializer
 class CommentSerializer(serializers.ModelSerializer):
+    profile_image = serializers.SerializerMethodField()
+    
     class Meta:
         model = api_models.Comment
         fields = "__all__"
+
+    # Fetch the profile image URL for the comment's author
+    def get_profile_image(self, obj):
+        user = api_models.User.objects.filter(email=obj.email).first()
+        if user and hasattr(user, 'profile') and user.profile.image:
+            return user.profile.image.url
+        return None
 
 # Post Image Serializer
 class PostImageSerializer(serializers.ModelSerializer):

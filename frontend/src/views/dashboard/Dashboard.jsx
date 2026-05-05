@@ -16,6 +16,25 @@ function Dashboard() {
 
 	const user_id = userData()?.user_id;
 
+	const defaultAvatar = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/svgs/solid/user.svg';
+
+	const getAvatar = (imagePath) => {
+		if (!imagePath || imagePath.includes('default-user.jpg') || imagePath.includes('default.jpg') || imagePath.includes('default/default-user.jpg')) {
+			return defaultAvatar;
+		}
+
+		if (imagePath.startsWith('/')) {
+			const baseURL = apiInstance.defaults.baseURL || 'http://127.0.0.1:8000/';
+			try {
+				const origin = new URL(baseURL).origin;
+				return `${origin}${imagePath}`;
+			} catch (e) {
+				return `http://127.0.0.1:8000${imagePath}`;
+			}
+		}
+		return imagePath;
+	};
+
 	// Helper function to prevent layout breaking by long texts
 	const truncateText = (text, maxLength) => {
 		if (text && text.length > maxLength) {
@@ -176,15 +195,29 @@ function Dashboard() {
 							</div>
 							<div className='card-body p-3'>
 								{comments.length > 0 ? (
-									comments.slice(0, 3).map((c) => (
-										<div key={c.id} className='d-flex align-items-center mb-3'>
-											<img src={c?.image || 'https://'} className='rounded-circle border' style={{ width: '50px', height: '50px', objectFit: 'cover' }} alt='' />
-											<div className='ms-3'>
-												<p className='mb-0 small fw-bold text-dark'>{truncateText(c?.comment, 40)}</p>
-												<small className='text-muted'>by {c?.name}</small>
+									comments.slice(0, 3).map((c) => {
+										const avatarUrl = c?.profile_image || c?.image;
+										return (
+											<div key={c.id} className='d-flex align-items-center mb-3'>
+												<img
+													src={getAvatar(avatarUrl)}
+													className='rounded-circle border'
+													style={{
+														width: '50px',
+														height: '50px',
+														objectFit: 'cover',
+														padding: avatarUrl ? '0' : '8px',
+														backgroundColor: '#f8f9fa',
+													}}
+													alt=''
+												/>
+												<div className='ms-3'>
+													<p className='mb-0 small fw-bold text-dark'>{truncateText(c?.comment, 40)}</p>
+													<small className='text-muted'>by {c?.name}</small>
+												</div>
 											</div>
-										</div>
-									))
+										);
+									})
 								) : (
 									<p className='text-center text-muted py-4 mb-0'>No comments</p>
 								)}
@@ -198,7 +231,6 @@ function Dashboard() {
 							)}
 						</div>
 					</div>
-
 					{/* Notifications column */}
 					<div className='col-md-6 col-xxl-4'>
 						<div className='card border-0 shadow-sm h-100 rounded-4'>
@@ -222,7 +254,9 @@ function Dashboard() {
 																? 'bi-chat-dots-fill text-primary'
 																: n.type === 'Bookmark'
 																	? 'bi-bookmark-fill text-info'
-																	: 'bi-bell-fill text-secondary'
+																	: n.type === 'Join'
+																		? 'bi-person-plus-fill text-success'
+																		: 'bi-bell-fill text-secondary'
 													}`}
 												/>
 											</div>
@@ -232,10 +266,11 @@ function Dashboard() {
 													{n.type === 'Like' && ` liked: `}
 													{n.type === 'Comment' && ` commented on: `}
 													{n.type === 'Bookmark' && ` saved: `}
+													{n.type === 'Join' && ` joined event: `}
 													<span className='text-muted fw-normal'>{truncateText(n.post?.title, 15)}</span>
 
 													{/* Fallback for unknown notification types */}
-													{!['Like', 'Comment', 'Bookmark'].includes(n.type) && ` triggered a ${n.type}`}
+													{!['Like', 'Comment', 'Bookmark', 'Join'].includes(n.type) && ` triggered a ${n.type}`}
 												</p>
 												{/* Relative timestamp */}
 												<small className='text-muted'>{moment(n.date).fromNow()}</small>
