@@ -1,5 +1,8 @@
 import { Route, Routes, BrowserRouter } from 'react-router-dom';
 
+// Plugins
+import ScrollToTop from './plugins/ScrollToTop';
+
 // Layouts
 import MainWrapper from './layouts/MainWrapper';
 import PrivateRoute from './layouts/PrivateRoute';
@@ -9,6 +12,7 @@ import Index from './views/core/Index';
 import Details from './views/core/Details';
 import Search from './views/core/Search';
 import Category from './views/core/Category';
+import Categories from './views/core/Categories';
 
 // Auth Views
 import Register from './views/auth/Register';
@@ -33,13 +37,15 @@ import Contact from './views/pages/Contact';
 function App() {
 	return (
 		<BrowserRouter>
+			<ScrollToTop />
 			<MainWrapper>
 				<Routes>
 					{/* Public Core Routes */}
 					<Route path='/' element={<Index />} />
 					<Route path='/:slug/' element={<Details />} />
-					<Route path='/category/' element={<Category />} />
+					<Route path='/category/:slug/' element={<Category />} />
 					<Route path='/search/' element={<Search />} />
+					<Route path='/categories/' element={<Categories />} />
 
 					{/* Authentication Routes */}
 					<Route path='/register/' element={<Register />} />

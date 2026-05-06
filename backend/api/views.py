@@ -55,13 +55,26 @@ class PostListAPIView(generics.ListAPIView):
         return api_models.Post.objects.exclude(status="Disabled").order_by('-date')
 
 # Filters reports by category slug
-class PostCategoryListAPIView(generics.ListAPIView):
-    serializer_class = api_serializers.PostSerializer
+class PostCategoryListAPIView(APIView):
     permission_classes = [AllowAny]
 
-    def get_queryset(self):
-        category_slug = self.kwargs['category_slug']
-        return api_models.Post.objects.filter(category__slug=category_slug).exclude(status="Disabled")
+    def get(self, request, category_slug):
+        try:
+            # Retrieve the specific category object by slug
+            category = api_models.Category.objects.get(slug=category_slug)
+        except api_models.Category.DoesNotExist:
+            return Response({"detail": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Retrieve all active posts linked to this category
+        posts = api_models.Post.objects.filter(category=category).exclude(status="Disabled")
+
+        category_serializer = api_serializers.CategorySerializer(category)
+        posts_serializer = api_serializers.PostSerializer(posts, many=True, context={'request': request})
+        
+        return Response({
+            "category": category_serializer.data,
+            "posts": posts_serializer.data
+        }, status=status.HTTP_200_OK)
 
 # Detail view for a report. Increments view count
 class PostDetailAPIView(generics.RetrieveAPIView):
