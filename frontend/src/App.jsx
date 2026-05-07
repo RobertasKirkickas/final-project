@@ -46,6 +46,7 @@ function App() {
 					<Route path='/category/:slug/' element={<Category />} />
 					<Route path='/search/' element={<Search />} />
 					<Route path='/categories/' element={<Categories />} />
+					<Route path='/search/' element={<Search />} />
 
 					{/* Authentication Routes */}
 					<Route path='/register/' element={<Register />} />

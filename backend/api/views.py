@@ -8,6 +8,7 @@ from django.http import Http404
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from api.serializers import ChangePasswordSerializer
+from django.db.models import Q
 
 # Documentation tool (Swagger)
 from drf_yasg import openapi
@@ -403,3 +404,22 @@ class ChangePasswordView(APIView):
 
         # Return validation errors if serializer is not valid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# Allows users to search for reports
+class PostSearchAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        query = request.GET.get('q') # Get the search query
+        if query:
+            # Search for posts containing the query
+            posts = api_models.Post.objects.filter(
+                Q(title__icontains=query) | 
+                Q(description__icontains=query) |
+                Q(category__title__icontains=query)
+            ).exclude(status="Disabled").distinct()
+        else:
+            posts = api_models.Post.objects.none()
+
+        serializer = api_serializers.PostSerializer(posts, many=True, context={'request': request})
+        return Response(serializer.data)

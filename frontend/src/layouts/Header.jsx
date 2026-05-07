@@ -1,8 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 
 function Header() {
+	const [searchQuery, setSearchQuery] = useState('');
+	const navigate = useNavigate();
+
+	const handleSearchSubmit = (e) => {
+		e.preventDefault();
+		if (searchQuery.trim()) {
+			navigate(`/search/?q=${searchQuery}`); // Redirect to search page
+		}
+	};
+
 	// Accessing authentication state and user data
 	const allUserData = useAuthStore((state) => state.allUserData);
 	const user = useAuthStore((state) => state.user);
@@ -29,17 +39,18 @@ function Header() {
 
 					{/* Search bar */}
 					<div className='flex-grow-1 px-1 px-md-5'>
-						<form className='w-100 position-relative' style={{ maxWidth: '500px', margin: '0 auto' }}>
+						<form onSubmit={handleSearchSubmit} className='w-100 position-relative' style={{ maxWidth: '500px', margin: '0 auto' }}>
 							<input
 								className='form-control pe-5 border-0 py-2'
 								type='search'
 								placeholder='Search...'
-								aria-label='Search'
+								value={searchQuery}
+								onChange={(e) => setSearchQuery(e.target.value)}
 								style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', color: 'white', fontSize: '0.9rem' }}
 							/>
-							<Link to='/search/' className='btn position-absolute top-50 end-0 translate-middle-y border-0 p-2'>
+							<button type='submit' className='btn position-absolute top-50 end-0 translate-middle-y border-0 p-2'>
 								<i className='bi bi-search text-white-50'></i>
-							</Link>
+							</button>
 						</form>
 					</div>
 

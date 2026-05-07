@@ -21,6 +21,7 @@ urlpatterns = [
     path('post/comment-post/', api_views.PostCommentAPIView.as_view()),
     path('post/bookmark-post/', api_views.BookmarkPostAPIView.as_view()),
     path('post/join/', api_views.JoinPostAPIView.as_view(), name='post_join'),
+    path('post/search/', api_views.PostSearchAPIView.as_view()),
 
     # Dashboard APIS
     path('dashboard/stats/<user_id>/', api_views.DashboardStats.as_view()),
