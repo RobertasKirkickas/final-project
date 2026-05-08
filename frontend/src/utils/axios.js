@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const apiInstance = axios.create({
-	baseURL: 'http://127.0.0.1:8000/api/v1/',
+	baseURL: import.meta.env.VITE_API_URL,
 	timeout: 5000,
 	headers: {
 		'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ apiInstance.interceptors.response.use(
 
 			if (refreshToken) {
 				try {
-					const response = await axios.post('http://127.0.0.1:8000/api/v1/user/token/refresh/', {
+					const response = await axios.post(`${import.meta.env.VITE_API_URL}user/token/refresh/`, {
 						refresh: refreshToken,
 					});
 
