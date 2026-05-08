@@ -176,7 +176,7 @@ function Dashboard() {
 							</div>
 							{posts.length > 0 && (
 								<div className='card-footer bg-transparent border-0 text-center pb-3 mt-auto'>
-									<Link to='/dashboard/posts/' className='btn btn-link btn-sm text-success fw-bold text-decoration-none'>
+									<Link to='/dashboard/all-reports/' className='btn btn-link btn-sm text-success fw-bold text-decoration-none'>
 										View all Reports
 									</Link>
 								</div>
@@ -224,7 +224,7 @@ function Dashboard() {
 							</div>
 							{comments.length > 0 && (
 								<div className='card-footer bg-transparent border-0 text-center pb-3 mt-auto'>
-									<Link to='/dashboard/comments/' className='btn btn-link btn-sm text-primary fw-bold text-decoration-none'>
+									<Link to='/dashboard/all-comments/' className='btn btn-link btn-sm text-primary fw-bold text-decoration-none'>
 										View all Comments
 									</Link>
 								</div>

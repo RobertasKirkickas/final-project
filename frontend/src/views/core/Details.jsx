@@ -472,6 +472,20 @@ function Details() {
 														{c.comment}
 													</p>
 												</div>
+
+												{/* Reporter's reply, if exists */}
+												{c.reply && (
+													<div className='mt-2 ms-4'>
+														<div className='p-3 rounded-4 border-start border-4 border-success shadow-sm' style={{ backgroundColor: '#f8f9fa' }}>
+															<div className='d-flex align-items-center mb-1'>
+																<h6 className='fw-bold mb-0 small text-success'>{user.full_name || user.username}</h6>
+															</div>
+															<p className='mb-0 text-muted small' style={{ lineHeight: '1.4' }}>
+																{c.reply}
+															</p>
+														</div>
+													</div>
+												)}
 											</div>
 										</div>
 									))

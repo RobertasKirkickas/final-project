@@ -99,8 +99,8 @@ class Post(models.Model):
     attendees = models.ManyToManyField(User, blank=True, related_name="joined_posts")
     slug = models.SlugField(unique=True, null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    scheduled_date = models.DateField(null=True, blank=True)
-    scheduled_time = models.TimeField(null=True, blank=True)
+    scheduled_date = models.DateField(auto_now_add=False, null=True, blank=True)
+    scheduled_time = models.TimeField(auto_now_add=False, null=True, blank=True)
 
     def __str__(self):
         return self.title

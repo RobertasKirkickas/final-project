@@ -268,6 +268,14 @@ class DashboardCommentLists(generics.ListAPIView):
     def get_queryset(self):
         user_id = self.kwargs.get('user_id')
         return api_models.Comment.objects.filter(post__user__id=user_id).order_by("-id")
+    
+    def delete(self, request, user_id, comment_id):
+        try:
+            comment = api_models.Comment.objects.get(id=comment_id, post__user__id=user_id)
+            comment.delete()
+            return Response({"message": "Comment deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except api_models.Comment.DoesNotExist:
+            return Response({"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND)
 
 # Lists all unseen notifications for a volunteer in the dashboard
 class DashboardNotificationsList(generics.ListAPIView):
@@ -315,7 +323,7 @@ class DashboardPostCreateAPIView(generics.CreateAPIView):
             description=request.data.get('description'),
             tags=request.data.get('tags'),
             category=category,
-            status=request.data.get('post_status', 'Reported'),
+            status=request.data.get('status', 'Reported'),
             scheduled_date=request.data.get('scheduled_date'),
             scheduled_time=request.data.get('scheduled_time')
         )

@@ -11,7 +11,7 @@ function AddPost() {
 		description: '',
 		category: '',
 		tags: '',
-		status: 'Reported',
+		status: '',
 		scheduled_date: '',
 		scheduled_time: '',
 	});
@@ -78,15 +78,21 @@ function AddPost() {
 		}
 
 		// Prepare form data for submission
+		const isScheduled = post.scheduled_date && post.scheduled_time;
+		const finalStatus = isScheduled ? 'Scheduled' : 'Reported';
+
 		const formData = new FormData();
 		formData.append('user_id', user_id);
 		formData.append('title', post.title);
 		formData.append('description', post.description);
 		formData.append('tags', post.tags);
 		formData.append('category', post.category);
-		formData.append('status', post.status);
-		formData.append('scheduled_date', post.scheduled_date);
-		formData.append('scheduled_time', post.scheduled_time);
+		formData.append('status', finalStatus);
+
+		if (isScheduled) {
+			formData.append('scheduled_date', post.scheduled_date);
+			formData.append('scheduled_time', post.scheduled_time);
+		}
 
 		// Append images to formData
 		images.forEach((img, index) => {

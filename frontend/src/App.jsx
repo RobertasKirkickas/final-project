@@ -23,12 +23,12 @@ import CreatePassword from './views/auth/CreatePassword';
 
 // Dashboard Views
 import Dashboard from './views/dashboard/Dashboard';
-import Posts from './views/dashboard/Posts';
 import AddPost from './views/dashboard/AddPost';
 import EditPost from './views/dashboard/EditPost';
-import Comments from './views/dashboard/Comments';
-import Notifications from './views/dashboard/Notifications';
 import Profile from './views/dashboard/Profile';
+import ViewAllNotifications from './views/dashboard/ViewAllNotifications';
+import ViewAllReports from './views/dashboard/ViewAllReports';
+import ViewAllComments from './views/dashboard/ViewAllComments';
 
 // Pages
 import About from './views/pages/About';
@@ -65,14 +65,6 @@ function App() {
 						}
 					/>
 					<Route
-						path='/dashboard/posts/'
-						element={
-							<PrivateRoute>
-								<Posts />
-							</PrivateRoute>
-						}
-					/>
-					<Route
 						path='/dashboard/add-post/'
 						element={
 							<PrivateRoute>
@@ -89,22 +81,6 @@ function App() {
 						}
 					/>
 					<Route
-						path='/dashboard/comments/'
-						element={
-							<PrivateRoute>
-								<Comments />
-							</PrivateRoute>
-						}
-					/>
-					<Route
-						path='/dashboard/notifications/'
-						element={
-							<PrivateRoute>
-								<Notifications />
-							</PrivateRoute>
-						}
-					/>
-					<Route
 						path='/dashboard/profile/'
 						element={
 							<PrivateRoute>
@@ -112,7 +88,30 @@ function App() {
 							</PrivateRoute>
 						}
 					/>
-
+					<Route
+						path='/dashboard/all-reports/'
+						element={
+							<PrivateRoute>
+								<ViewAllReports />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path='/dashboard/all-comments/'
+						element={
+							<PrivateRoute>
+								<ViewAllComments />
+							</PrivateRoute>
+						}
+					/>
+					<Route
+						path='/dashboard/notifications/'
+						element={
+							<PrivateRoute>
+								<ViewAllNotifications />
+							</PrivateRoute>
+						}
+					/>
 					{/* Public Pages */}
 					<Route path='/about/' element={<About />} />
 					<Route path='/contact/' element={<Contact />} />

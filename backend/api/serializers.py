@@ -68,6 +68,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.Comment
         fields = "__all__"
+        depth = 1
 
     # Fetch the profile image URL for the comment's author
     def get_profile_image(self, obj):
