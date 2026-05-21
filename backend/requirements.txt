@@ -13,3 +13,4 @@ django-shortuuidfield==0.1.3
 asgiref
 sqlparse
 tzdata
+django-jazzmin
